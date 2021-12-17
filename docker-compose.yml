@@ -1,0 +1,37 @@
+version: '3.5'
+networks:
+  certificates:
+    driver: bridge
+services:
+  lumen:
+    container_name: lumen
+    ports:
+      - "8010:8010"
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor/
+    build: .
+    command: php -S lumen:8010 -t public
+    restart: always
+    depends_on:
+      - db
+    networks:
+      - certificates
+  mysql:
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./database/mysql-data:/var/lib/mysql:rw
+    networks:
+      - certificates
+volumes:
+  mysql-data:
